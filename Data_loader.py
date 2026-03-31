@@ -1,4 +1,4 @@
-from graph_utils import *
+from utils import *
 import scipy.io as sio
 from sklearn.model_selection import StratifiedKFold
 

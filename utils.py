@@ -6,6 +6,19 @@ from scipy.io import loadmat, savemat
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 
+
+def embedding_matches_dimension(path, expected_dim):
+    if not os.path.exists(path):
+        return False
+    try:
+        with open(path, 'r') as f:
+            header = f.readline().strip().split()
+        if len(header) != 2:
+            return False
+        return int(header[1]) == expected_dim
+    except (OSError, ValueError):
+        return False
+
 def graph_similarity(graph):
     alpha = 0.99
     row_sums = graph.sum(axis=1)
@@ -19,7 +32,8 @@ def graph_similarity(graph):
 
 def data_process(args, biased, data_directory='./data/DBLP/edgelist.txt', output_directory="./data/DBLP", directed=False):
     node_dict, node_index, original_node_index, node_value = preprocess_edgelist(data_directory, directed)
-    if not os.path.exists("{}/{}_emb".format(output_directory, args.data)):
+    embedding_path = "{}/{}_emb".format(output_directory, args.data)
+    if not embedding_matches_dimension(embedding_path, args.emb_size):
         os.system("python ./deepwalk/main.py --representation-size {} --input {} --output {}/{}_emb".format(
             args.emb_size, data_directory[:-4] + '_new' + data_directory[-4:], output_directory, args.data))
     # original graph

@@ -1,0 +1,13 @@
+
+Ours:
+d_max = 2708
+d_min = 2708
+d = 2708.0
+LCC = 2708
+wedge_count = 9925572824.0
+claw_count = 8952866687248.0
+power_law_exp = 3.0
+gini = -0.0007385524372230945
+rel_edge_distr_entropy = 0.9999999953279627
+assortativity = nan
+n_components = 1

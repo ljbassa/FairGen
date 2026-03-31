@@ -9,6 +9,7 @@ from argparse import ArgumentParser, FileType, ArgumentDefaultsHelpFormatter
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 import logging
+import inspect
 
 # from . import graph
 import graph
@@ -37,6 +38,24 @@ except AttributeError:
 
 logger = logging.getLogger(__name__)
 LOGFORMAT = "%(asctime).19s %(levelname)s %(filename)s: %(lineno)s %(message)s"
+
+
+def build_word2vec_kwargs(args):
+  kwargs = dict(
+      sentences=None,
+      window=args.window_size,
+      min_count=0,
+      sg=1,
+      hs=1,
+      workers=args.workers)
+
+  signature = inspect.signature(Word2Vec.__init__)
+  if "vector_size" in signature.parameters:
+    kwargs["vector_size"] = args.representation_size
+  else:
+    kwargs["size"] = args.representation_size
+
+  return kwargs
 
 
 def debug(type_, value, tb):
@@ -76,7 +95,9 @@ def process(args):
     walks = graph.build_deepwalk_corpus(G, num_paths=args.number_walks,
                                         path_length=args.walk_length, alpha=0, rand=random.Random(args.seed))
     print("Training...")
-    model = Word2Vec(walks, vector_size=args.representation_size, window=args.window_size, min_count=0, sg=1, hs=1, workers=args.workers)
+    word2vec_kwargs = build_word2vec_kwargs(args)
+    word2vec_kwargs["sentences"] = walks
+    model = Word2Vec(**word2vec_kwargs)
   else:
     print("Data size {} is larger than limit (max-memory-data-size: {}).  Dumping walks to disk.".format(data_size, args.max_memory_data_size))
     print("Walking...")
