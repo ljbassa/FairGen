@@ -1,0 +1,5 @@
+# generated artifacts
+saved_generated/
+*.pt
+*.pth
+*.ckpt

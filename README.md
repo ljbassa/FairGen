@@ -31,6 +31,21 @@ unzip data.zip
 python main.py -d FLICKR -b
 ```
 
+3. Train/sample on `cora` and export the generated graph in the same format as FairWire:
+```
+python main.py -d cora -b \
+  --save_pkl_dir generated_pkls \
+  --save_pt_path generated_graphs/cora_samples.pyg.pt
+```
+
+4. If you already have a generated FairGen edge list and only want to convert it:
+```
+python sample.py -d cora \
+  --graph_path data/cora/cora_output_edgelist_0_2.txt \
+  --save_pkl_dir generated_pkls \
+  --save_pt_path generated_graphs/cora_samples.pyg.pt
+```
+
 ### Some important flags:
 * -d: the name of the dataset
 * -g: the index of the gpu, 0 is the default value. If not using gpu, ignore this flag.
@@ -41,6 +56,10 @@ python main.py -d FLICKR -b
 The edge list of the synthetic graph is stored in the directory: "'./data/FLICKR/FLICKR_output_edgelist_0_2.txt".
 
 The final results will be stored in the directory: "./data/FLICKR/FLICKR_output_edgelist_0_2_metric.txt".
+
+If `--save_pkl_dir` is used, FairGen also exports `generated_pkls/sample_000.pkl` with the same
+NetworkX node attributes used by FairWire:
+`orig_id`, `x`, `y`, `sens`.
 
 
 ### Please cite our paper if you find it useful:

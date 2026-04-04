@@ -22,10 +22,10 @@ class Config(object):
     lr = 0.03
     max_epochs = 10
     batch_size = 64
-    max_sen_len = 15
-    action_prob = [0.5, 0.4, 0.1]
-    search_size = 500
-    sample_time = 20
+    max_sen_len = 8 # 15
+    action_prob = [0.2, 0.2, 0.2] # [0.5, 0.4, 0.1]
+    search_size = 100 # 500
+    sample_time = 8 # 20
     # parameter for accelerating the computation
     windows_size = 2
 
@@ -317,7 +317,7 @@ def main(args, config, output_directory):
     model.load_state_dict(new_model)
     train_dataset = data_loader(output_directory, args.embedding, 0, 0, 'train')
     train_iterator = DataLoader(train_dataset, batch_size=50, shuffle=True, num_workers=8)
-    config.threshold = max(threshold(train_iterator, model), 0.95)
+    config.threshold = max(threshold(train_iterator, model), 0.995) # 0.95
     # initialize discriminator
     data = loadmat(output_directory + '/{}_label_0_0.mat'.format(config.data))
     num = len(np.unique(data['label']))
@@ -374,9 +374,15 @@ def main(args, config, output_directory):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("FairNet", conflict_handler='resolve')
-    parser.add_argument('-d', dest='data', type=str, default='FLICKR', help='data directory')
+    parser.add_argument('-d', '--dataset', dest='data', type=str, default='FLICKR', help='data directory')
     parser.add_argument('-g', dest='gpu', type=str, default='0', help='the index of GPU')
     parser.add_argument('-b', dest='biased', action='store_true', help="biased or unbiased, default is unbiased")
+    parser.add_argument('--save_pkl_dir', type=str, default=None,
+                        help='If set, export the final generated graph as FairWire-style sample_000.pkl.')
+    parser.add_argument('--save_pt_path', type=str, default=None,
+                        help='If set, export the final generated graph as a FairWire-compatible list[PyG Data] .pt file.')
+    parser.add_argument('--skip_metrics', action='store_true',
+                        help='Skip metrics.py after generation.')
     # parser.add_argument('-m', dest='mode', action='store_true', help='train or test')
     args = parser.parse_args()
     config = Config()
@@ -396,7 +402,19 @@ if __name__ == "__main__":
     args.emb_size = config.d_model
     data_process(args, biased, data_directory=data_directory, output_directory=output_directory, directed=False)
     filename = main(args, config, output_directory)
+    if args.save_pkl_dir is not None or args.save_pt_path is not None:
+        from sample import export_generated_graph
+
+        export_generated_graph(
+            dataset_name=args.data,
+            graph_path=filename,
+            mapping_path='{}/graph.pickle'.format(output_directory),
+            save_pkl_dir=args.save_pkl_dir,
+            save_pt_path=args.save_pt_path,
+            sample_idx=0,
+        )
     # filename = './data/FLICKR/FLICKR_output_edgelist_0_2.txt'
     # evaluating the performance
-    os.system('python metrics.py -d {} -f {}'.format(args.data, filename))
+    if not args.skip_metrics:
+        os.system('python metrics.py -d {} -f {}'.format(args.data, filename))
 

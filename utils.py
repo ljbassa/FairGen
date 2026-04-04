@@ -66,7 +66,7 @@ def dictionary_search(dictionary, search_value):
 
 
 def random_walks(node_dict, node_similarity, degree, output_directory, biased, node_index, data_directory):
-    walk_length = 10
+    walk_length = 10 #10
     if biased:
         random_walk_strategy = biased_neighbor_selection_with_prob
         repeated = list(map(int, np.array(degree / 5) + 1))
