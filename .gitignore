@@ -3,3 +3,6 @@ saved_generated/
 *.pt
 *.pth
 *.ckpt
+__pycache__/
+*.pyc
+*.pkl
